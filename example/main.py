@@ -29,7 +29,9 @@ def main():
     plt.ylim(-8, 12)
     plt.legend(['$y = x*\sin(x)$', 'Observed values'], loc='upper left', fontsize=16)
     plt.tick_params(labelsize=16)
-    plt.savefig("plots/data.png")
+    png_name="plots/data.png"
+    print(png_name)
+    plt.savefig(png_name)
     plt.close()
 
 
@@ -54,9 +56,13 @@ def main():
     plt.ylim(-8, 12)
     plt.legend(['$y = x*\sin(x)$', 'Observed values', 'Predicted mean', '95% confidence interval'], loc='upper left', fontsize=16)
     plt.tick_params(labelsize=16)
-    plt.savefig("plots/result.png")
+    png_name="plots/result.png"
+    print(png_name)
+    plt.savefig(png_name)
     plt.close()
 
 
 
 
+if __name__ == "__main__":
+    main()

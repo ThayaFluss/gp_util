@@ -12,26 +12,32 @@ class GPR_predictor:
         super().__init__()
         self.scaler_y = None
 
-        # GPモデルの構築
         self.kernel = ConstantKernel() * RBF() + WhiteKernel()
         self.gpr = GaussianProcessRegressor(kernel=self.kernel, alpha=0)
 
+    def configure(self, x):
+        len_x =len(x.shape)
+        if len_x == 1:
+            out = np.copy(x.reshape(-1,1))
+        elif len_x == 2:
+            out = np.copy(x)
+        else:
+            raise ValueError
+
+        return out
+
 
     def train(self, x, y):
-        if not len(x.shape) == 2:
-            x = x.reshape(-1,1)
-
-        if not len(y.shape) == 2:
-            y = y.reshape(-1,1)
+        x = self.configure(x)
+        y = self.configure(y)
 
         ### scaling y
         self.scaler_y = StandardScaler().fit(y)
         self.gpr.fit(x, self.scaler_y.transform(y))
 
-        # kernel関数のパラメータの確認
-        print(self.gpr.kernel_)
-        # 1.36**2 * RBF(length_scale=3.07) + WhiteKernel(noise_level=0.061)
+        print("Kernel: {}".format(self.gpr.kernel_))
         return 
+
 
     def predict(self, x):
         """
@@ -44,14 +50,13 @@ class GPR_predictor:
             pred_sigma  numpy.ndarray:
                 predicted std
         """
-        if not len(x.shape) == 2:
-            x_temp = x.reshape(-1,1)
+        origin_shape = x.shape
+        x = self.configure(x)
 
-
-        pred_mu, pred_sigma = self.gpr.predict(x_temp, return_std=True)
+        pred_mu, pred_sigma = self.gpr.predict(x, return_std=True)
         pred_mu = self.scaler_y.inverse_transform(pred_mu)
         pred_sigma = pred_sigma * self.scaler_y.scale_
 
-        return pred_mu.reshape(x.shape), pred_sigma.reshape(x.shape)
+        return pred_mu.reshape(origin_shape), pred_sigma.reshape(origin_shape)
 
 
